@@ -1,4 +1,6 @@
-fileFilter = (req, file, callback) => {
+const multer = require("multer");
+
+const fileFilter = (req, file, callback) => {
   if (
     file.mimetype === "image/png" ||
     file.mimetype === "image/jpg" ||
@@ -8,4 +10,9 @@ fileFilter = (req, file, callback) => {
   } else callback(null, false);
 };
 
-exports.fileFilter = fileFilter;
+const storage = multer.diskStorage({});
+
+module.exports = {
+  fileFilter,
+  storage,
+};

@@ -1,37 +1,31 @@
 require("dotenv").config();
+const port = process.env.PORT || 5000;
 const express = require("express");
 const multer = require("multer");
 const mongoose = require("mongoose");
-
-const user = require("./routes/routeUser");
-const profile = require("./routes/routeProfile");
-const listing = require("./routes/routeListing");
-const order = require("./routes/routeOrder");
-const ticket = require("./routes/routeTicket");
-
-const { fileFilter } = require("./services/img-upload/fileFilter");
-const storage = multer.diskStorage({});
-
-const port = process.env.PORT || 5000;
 const app = express();
 
+const { fileFilter, storage } = require("./services/img-upload/fileFilter");
+
 try {
-    mongoose
-      .connect(process.env.CONNECTION_STRING)
-      .then((value) =>console.log(`SERVER IS CONNECTED TO ${value.connections[0]._connectionString}`))
-      .catch(() => console.log("SERVER CANNOT CONNECT TO MONGODB"));
+  mongoose
+    .connect(process.env.CONNECTION_STRING)
+    .then((value) => console.log("SERVER IS CONNECTED"))
+    .catch(() => console.log("SERVER CANNOT CONNECT"));
 
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(multer({ storage, fileFilter }).single("img"));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(multer({ storage, fileFilter }).single("img"));
 
-    app.use("/api", user);
-    app.use("/api", profile);
-    app.use("/api", listing);
-    app.use("/api", order);
-    app.use("/api", ticket);
+  app.use("/api", require("./routes/routeUser"));
+  app.use("/api", require("./routes/routeProfile"));
+  app.use("/api", require("./routes/routeProduct"));
+  app.use("/api", require("./routes/routeCheckout"));
+  app.use("/api", require("./routes/routeTicket"));
+  app.use("/api", require("./routes/routeCart"));
+  app.use("/api", require("./routes/routeStatistics"));
 
-    app.listen(port, () => console.log(`SERVER IS RUNNING ON ${port}`));
+  app.listen(port, () => console.log(`SERVER IS RUNNING ON ${port}`));
 } catch (error) {
   console.log(error);
 }
