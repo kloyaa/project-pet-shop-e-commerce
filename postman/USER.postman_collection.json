@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b9008da2-fbee-402b-9c2b-24027a549dae",
+		"_postman_id": "bd025d3a-e135-4396-b524-f04b88c0f749",
 		"name": "USER",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19674577"
 	},
 	"item": [
 		{
@@ -12,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"sample1@email.com\",\r\n    \"password\": \"sample1\"\r\n}",
+					"raw": "{\r\n    \"email\": \"sample@gmail.com\",\r\n    \"password\": \"password\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -20,10 +21,10 @@
 					}
 				},
 				"url": {
-					"raw": "https://api-laundryna.herokuapp.com/api/user/register",
+					"raw": "https://api-petshop-ecommerce.herokuapp.com/api/user/register",
 					"protocol": "https",
 					"host": [
-						"api-laundryna",
+						"api-petshop-ecommerce",
 						"herokuapp",
 						"com"
 					],
@@ -43,7 +44,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"sample1@email.com\",\r\n    \"password\": \"sample1\"\r\n}",
+					"raw": "{\r\n    \"email\": \"sample@gmail.com\",\r\n    \"password\": \"password\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -51,10 +52,10 @@
 					}
 				},
 				"url": {
-					"raw": "https://api-laundryna.herokuapp.com/api/user/login",
+					"raw": "https://api-petshop-ecommerce.herokuapp.com/api/user/login",
 					"protocol": "https",
 					"host": [
-						"api-laundryna",
+						"api-petshop-ecommerce",
 						"herokuapp",
 						"com"
 					],
