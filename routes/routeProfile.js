@@ -9,7 +9,7 @@ const global = require("../controllers/profile/profileController");
 const protected = require("../middleware/authentication");
 
 // PROFILE
-router.post("/profile/g/:id", (req, res) => global.deleteProfile(req, res));
+router.delete("/profile/g/:id", (req, res) => global.deleteProfile(req, res));
 
 // MERCHANT PROFILE
 router.post("/profile/merchant", (req, res) =>
