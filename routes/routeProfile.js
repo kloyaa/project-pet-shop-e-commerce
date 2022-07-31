@@ -4,7 +4,12 @@ const router = express.Router();
 const merchant = require("../controllers/profile/merchantProfileController");
 const customer = require("../controllers/profile/customerProfileController");
 const rider = require("../controllers/profile/riderProfileController");
+const global = require("../controllers/profile/profileController");
+
 const protected = require("../middleware/authentication");
+
+// PROFILE
+router.post("/profile/g/:id", (req, res) => global.deleteProfile(req, res));
 
 // MERCHANT PROFILE
 router.post("/profile/merchant", (req, res) =>
