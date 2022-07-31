@@ -7,6 +7,10 @@ const CustomerProfileSchema = new Schema({
     type: String,
     required: [true, "accountId is required"],
   },
+  role: {
+    type: String,
+    default: "customer",
+  },
   name: {
     first: {
       type: String,
@@ -68,6 +72,10 @@ const MerchantProfileSchema = new Schema({
     type: String,
     required: [true, "accountId is required"],
   },
+  role: {
+    type: String,
+    default: "merchant",
+  },
   avatar: { type: String },
   banner: { type: String },
   name: { type: String },
@@ -128,6 +136,10 @@ const RiderProfileSchema = new Schema({
   accountId: {
     type: String,
     required: [true, "accountId is required"],
+  },
+  role: {
+    type: String,
+    default: "rider",
   },
   avatar: { type: String },
   name: {
