@@ -1,9 +1,7 @@
 import 'package:app/common/destroyTextFieldFocus.dart';
-import 'package:app/common/print.dart';
 import 'package:app/const/colors.dart';
 import 'package:app/const/material.dart';
 import 'package:app/const/strings.dart';
-import 'package:app/controllers/globalController.dart';
 import 'package:app/controllers/userController.dart';
 import 'package:app/widget/form.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +43,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
         email: _email,
         password: _password,
       );
+
       setState(() {
         _hasError = false;
       });
@@ -72,8 +71,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
     _passwordController = TextEditingController();
     _passwordFocus = FocusNode();
 
-    // _emailController.text = "madridano.kolya@gmail.com";
-    // _passwordController.text = "password";
+    _emailController.text = "madridano.kolya@gmail.com";
+    _passwordController.text = "password";
   }
 
   @override
@@ -274,7 +273,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
                         onPressed: () => onProceed(),
                         style: TextButton.styleFrom(
                           //primary: kFadeWhite,
-                          backgroundColor: kLight,
+                          backgroundColor: kSecondary,
                           shape: const RoundedRectangleBorder(
                             borderRadius: kDefaultRadius,
                           ),
@@ -284,7 +283,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
                           style: GoogleFonts.roboto(
                             fontSize: 14.0,
                             fontWeight: FontWeight.w400,
-                            color: kPrimary,
+                            color: kLight,
                           ),
                         ),
                       ),

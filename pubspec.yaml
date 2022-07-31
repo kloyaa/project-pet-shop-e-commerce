@@ -41,6 +41,10 @@ dependencies:
   jiffy: ^5.0.0
   loading_indicator: ^3.0.3
 
+  location: ^4.3.0
+  geocoding: ^2.0.2
+  latlong2: ^0.8.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -21,7 +21,7 @@ TextField inputTextField(
     focusNode: focusNode,
     obscureText: obscureText ?? false,
     decoration: InputDecoration(
-      contentPadding: const EdgeInsets.all(25.0),
+      contentPadding: const EdgeInsets.all(20),
       filled: true,
       fillColor: color,
       floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -71,7 +71,7 @@ TextField inputSearchTextField({
     onSubmitted: (v) => onSubmited(),
     textInputAction: TextInputAction.search,
     decoration: InputDecoration(
-      contentPadding: const EdgeInsets.all(25.0),
+      contentPadding: const EdgeInsets.all(20),
       filled: true,
       fillColor: color,
       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -119,7 +119,7 @@ TextField inputNumberTextField({
     focusNode: focusNode,
     keyboardType: TextInputType.number,
     decoration: InputDecoration(
-      contentPadding: const EdgeInsets.all(25.0),
+      contentPadding: const EdgeInsets.all(20),
       filled: true,
       fillColor: color,
       floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -169,7 +169,7 @@ TextField inputTextArea({
     maxLines: 3,
     keyboardType: TextInputType.multiline,
     decoration: InputDecoration(
-      contentPadding: const EdgeInsets.all(25.0),
+      contentPadding: const EdgeInsets.all(20),
       filled: true,
       fillColor: color,
       floatingLabelBehavior: FloatingLabelBehavior.auto,

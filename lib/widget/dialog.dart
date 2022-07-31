@@ -23,7 +23,7 @@ Future dialogLoading(BuildContext context) async {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
+                SizedBox(
                   height: 45.0,
                   child: LoadingIndicator(
                     indicatorType: Indicator.circleStrokeSpin,

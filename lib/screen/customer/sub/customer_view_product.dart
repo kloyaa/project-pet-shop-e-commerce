@@ -93,7 +93,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
     _getListings = _listing.getListings(
       merchantId: _listing.selectedListing["accountId"],
     );
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _tileKey.currentState!.expand();
     });
   }

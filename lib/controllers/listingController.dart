@@ -1,4 +1,4 @@
-import 'package:app/const/url.dart';
+import 'package:app/const/uri.dart';
 import 'package:app/controllers/profileController.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -35,13 +35,7 @@ class ListingController extends GetxController {
   }
 
   Future<dynamic> getAllListings() async {
-    final _listingsResponse = await Dio().get(
-      baseUrl + "/merchant/listing",
-      queryParameters: {
-        "type": "all",
-        "availability": true,
-      },
-    );
+    final _listingsResponse = await Dio().get(baseUrl + "/product/all");
     return _listingsResponse.data;
   }
 

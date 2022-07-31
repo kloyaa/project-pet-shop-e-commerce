@@ -210,7 +210,7 @@ class _MerchantMainState extends State<MerchantMain> {
       child: GestureDetector(
         onTap: () => Get.toNamed("/merchant-additem"),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: kPrimary,
             borderRadius: kDefaultRadius,
           ),

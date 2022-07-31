@@ -65,8 +65,8 @@ class _LoginState extends State<Login> {
     _passwordController = TextEditingController();
     _passwordFocus = FocusNode();
 
-    // _emailController.text = "madridano.kolya@gmail.com";
-    // _passwordController.text = "password";
+    _emailController.text = "madridano.kolya@gmail.com";
+    _passwordController.text = "password";
     // _emailController.text = "pet.supplies@gmail.com";
     // _passwordController.text = "password";
   }
@@ -181,13 +181,13 @@ class _LoginState extends State<Login> {
                     color: kLight,
                     hasError: _hasError,
                     labelText: "Email",
-                    textFieldStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
+                    textFieldStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
-                    hintStyleStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
+                    hintStyleStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
@@ -203,13 +203,13 @@ class _LoginState extends State<Login> {
                     color: kLight,
                     hasError: _hasError,
                     labelText: "Password",
-                    textFieldStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
+                    textFieldStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
-                    hintStyleStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
+                    hintStyleStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
@@ -244,7 +244,7 @@ class _LoginState extends State<Login> {
                     onPressed: () => onLogin(),
                     style: TextButton.styleFrom(
                       //primary: kFadeWhite,
-                      backgroundColor: kLight,
+                      backgroundColor: kSecondary,
                       shape: const RoundedRectangleBorder(
                         borderRadius: kDefaultRadius,
                       ),
@@ -252,9 +252,9 @@ class _LoginState extends State<Login> {
                     child: Text(
                       "LOG IN",
                       style: GoogleFonts.roboto(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w400,
-                        color: kPrimary,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                        color: kLight,
                       ),
                     ),
                   ),

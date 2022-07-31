@@ -2,7 +2,10 @@ import 'package:app/common/destroyTextFieldFocus.dart';
 import 'package:app/const/colors.dart';
 import 'package:app/const/material.dart';
 import 'package:app/controllers/globalController.dart';
+import 'package:app/controllers/profileController.dart';
 import 'package:app/controllers/userController.dart';
+import 'package:app/services/location_coordinates.dart';
+import 'package:app/services/location_name.dart';
 import 'package:app/widget/form.dart';
 import 'package:bottom_picker/bottom_picker.dart';
 import 'package:bottom_picker/resources/arrays.dart';
@@ -23,6 +26,10 @@ class RegisterAccountProfile extends StatefulWidget {
 class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
   final _user = Get.put(UserController());
   final _global = Get.put(GlobalController());
+  final _profile = Get.put(ProfileController());
+
+  late TextEditingController _emailController;
+  late FocusNode _emailFocus;
 
   late TextEditingController _firstNameController;
   late FocusNode _firstNameFocus;
@@ -39,139 +46,67 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
   late TextEditingController _merchantNameController;
   late FocusNode _merchantNameFocus;
 
-  String _openTime = "Select Open Time";
-  String _closingTime = "Select Closing Time";
-
   Future<void> onProceed() async {
     final _firstName = _firstNameController.text.trim();
     final _lastName = _lastNameController.text.trim();
     final _address = _addressController.text.trim();
-    final _merchantName = _merchantNameController.text.trim();
 
     final _contact = _contactController.text.trim().replaceAll(r' ', "");
 
     // VALIDATE
-    if (_global.registrationProperties["accountType"] == "customer") {
-      if (_firstName.isEmpty) {
-        return _firstNameFocus.requestFocus();
-      }
-      if (_lastName.isEmpty) {
-        return _lastNameFocus.requestFocus();
-      }
+    if (_firstName.isEmpty) {
+      return _firstNameFocus.requestFocus();
     }
-    if (_global.registrationProperties["accountType"] == "merchant") {
-      if (_merchantName.isEmpty) {
-        return _merchantNameFocus.requestFocus();
-      }
-      if (_openTime == "Select Open Time") {
-        return selectServiceHrs("open");
-      }
-      if (_closingTime == "Select Closing Time") {
-        return selectServiceHrs("close");
-      }
+    if (_lastName.isEmpty) {
+      return _lastNameFocus.requestFocus();
     }
-
     if (_contact.isEmpty) {
       return _contactFocus.requestFocus();
     }
-    if (_address.isEmpty) {
-      return _addressFocus.requestFocus();
-    }
 
-    // CONCAT SERVICE HRS
-    final serviceHrs = _openTime + " to " + _closingTime;
+    final _locationCoordinates = await getLocation();
+    final _locationName = await getLocationName(
+      lat: _locationCoordinates?.latitude,
+      long: _locationCoordinates?.longitude,
+    );
 
     // ASSIGN VALUE TO GLOBAL STATE
-    _global.registrationProperties.addAll(
+    _profile.createProfileData.addAll(
       {
-        "merchantName": _merchantName,
-        "serviceHrs": serviceHrs,
+        "accountId": _user.userLoginData["accountId"],
         "name": {
           "first": _firstName,
           "last": _lastName,
         },
         "contact": {
+          "email": _user.userLoginData["email"],
           "number": _contact,
-          "email": _global.registrationProperties["loginData"]["email"],
         },
         "address": {
+          "name": "${_locationName[0].street}, ${_locationName[0].locality}",
           "coordinates": {
-            "latitude": "8.4354216",
-            "longitude": "124.6190972",
-          },
-          "name": _address
+            "longitude": _locationCoordinates?.longitude,
+            "latitude": _locationCoordinates?.latitude
+          }
         },
+        "verified": false,
+        "visibility": true
       },
     );
-
-    if (_global.registrationProperties["accountType"] == "merchant") {
-      _global.registrationProperties.remove("name");
-    }
-    if (_global.registrationProperties["accountType"] == "customer") {
-      _global.registrationProperties.remove("merchantName");
-      _global.registrationProperties.remove("serviceHrs");
-    }
 
     // REDIRECT
     Get.toNamed("/register-account-picture");
   }
 
-  void selectServiceHrs(type) {
-    if (type == "open") {
-      return BottomPicker.time(
-        height: Get.height * 0.50,
-        title: "Select Opening Time",
-        buttonAlignement: MainAxisAlignment.end,
-        buttonSingleColor: kPrimary,
-        pickerTextStyle: GoogleFonts.chivo(
-          fontSize: 13.0,
-          fontWeight: FontWeight.w400,
-          color: kPrimary,
-        ),
-        titleStyle: GoogleFonts.chivo(
-          fontSize: 16.0,
-          fontWeight: FontWeight.w500,
-          color: kPrimary,
-        ),
-        onSubmit: (date) {
-          setState(() {
-            _openTime = Jiffy(date).jm;
-          });
-        },
-        onClose: () {
-          print("Picker closed");
-        },
-        use24hFormat: false,
-      ).show(context);
-    }
-    if (type == "close") {
-      return BottomPicker.time(
-        height: Get.height * 0.50,
-        title: "Select Closing Time",
-        buttonAlignement: MainAxisAlignment.end,
-        buttonSingleColor: kPrimary,
-        pickerTextStyle: GoogleFonts.chivo(
-          fontSize: 13.0,
-          fontWeight: FontWeight.w400,
-          color: kPrimary,
-        ),
-        titleStyle: GoogleFonts.chivo(
-          fontSize: 16.0,
-          fontWeight: FontWeight.w500,
-          color: kPrimary,
-        ),
-        onSubmit: (date) {
-          setState(() {
-            _closingTime = Jiffy(date).jm;
-          });
-        },
-        onClose: () {
-          print("Picker closed");
-        },
-        bottomPickerTheme: BOTTOM_PICKER_THEME.orange,
-        use24hFormat: false,
-      ).show(context);
-    }
+  void onLocationSync() async {
+    final _locationCoordinates = await getLocation();
+    final _locationName = await getLocationName(
+      lat: _locationCoordinates?.latitude,
+      long: _locationCoordinates?.longitude,
+    );
+
+    final _location = _locationName[0];
+    _addressController.text = "${_location.street}, ${_location.locality}";
   }
 
   @override
@@ -186,6 +121,8 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
     _contactFocus = FocusNode();
     _addressController = TextEditingController();
     _addressFocus = FocusNode();
+    _emailController = TextEditingController();
+    _emailFocus = FocusNode();
 
     _merchantNameController = TextEditingController();
     _merchantNameFocus = FocusNode();
@@ -203,71 +140,26 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
     _contactFocus.dispose();
     _addressController.dispose();
     _addressFocus.dispose();
-
+    _emailController.dispose();
+    _emailFocus.dispose();
     _merchantNameController.dispose();
     _merchantNameFocus.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final _breadCrumbs = Container(
-      margin: kDefaultBodyPadding.copyWith(left: 15.0),
-      child: Row(
-        children: [
-          Text(
-            "Account",
-            style: GoogleFonts.chivo(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w500,
-              color: kLight,
-              height: 1.5,
-            ),
-          ),
-          const Icon(
-            Entypo.chevron_right,
-            color: kLight,
-            size: 15.0,
-          ),
-          Text(
-            "Type",
-            style: GoogleFonts.chivo(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w500,
-              color: kLight,
-              height: 1.5,
-            ),
-          ),
-          const Icon(
-            Entypo.chevron_right,
-            color: kLight,
-            size: 15.0,
-          ),
-          Text(
-            "Info",
-            style: GoogleFonts.chivo(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w500,
-              color: kLight,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
     final _title = Text(
-      _global.registrationProperties["accountType"] == "customer"
-          ? "Customer Details"
-          : "Merchant Details",
+      "Profile Setup",
       style: GoogleFonts.chivo(
-        fontSize: 25.0,
         fontWeight: FontWeight.bold,
         color: kLight,
+        fontSize: 15,
       ),
     );
     final _subTitle = Text(
-      "Write basic details",
+      "It’s quick and easy.",
       style: GoogleFonts.roboto(
-        fontSize: 16.0,
+        fontSize: 12.0,
         fontWeight: FontWeight.w300,
         color: kLight,
       ),
@@ -281,7 +173,10 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
           resizeToAvoidBottomInset: false,
           backgroundColor: kPrimary,
           appBar: AppBar(
-            title: _breadCrumbs,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [_title, _subTitle],
+            ),
             backgroundColor: kPrimary,
             elevation: 0,
             leading: const SizedBox(),
@@ -290,7 +185,7 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
               Container(
                 margin: const EdgeInsets.only(right: 15.0),
                 child: IconButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => _user.logout(),
                   splashRadius: 20.0,
                   icon: const Icon(
                     AntDesign.close,
@@ -306,129 +201,75 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _title,
-                _subTitle,
-                _global.registrationProperties["accountType"] == "customer"
-                    ? Container(
-                        margin: const EdgeInsets.only(top: 40.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: inputTextField(
-                                controller: _firstNameController,
-                                focusNode: _firstNameFocus,
-                                color: kLight,
-                                hasError: false,
-                                labelText: "Firstname",
-                                textFieldStyle: GoogleFonts.chivo(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: kPrimary,
-                                ),
-                                hintStyleStyle: GoogleFonts.chivo(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w400,
-                                  color: kPrimary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Expanded(
-                              child: inputTextField(
-                                controller: _lastNameController,
-                                focusNode: _lastNameFocus,
-                                hasError: false,
-                                labelText: "Lastname",
-                                color: kLight,
-                                textFieldStyle: GoogleFonts.chivo(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: kPrimary,
-                                ),
-                                hintStyleStyle: GoogleFonts.chivo(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w400,
-                                  color: kPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : Container(
-                        margin: const EdgeInsets.only(top: 40.0),
-                        width: double.infinity,
+                IgnorePointer(
+                  ignoring: true,
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 20.0),
+                    child: inputTextField(
+                      controller: _emailController,
+                      focusNode: _emailFocus,
+                      hasError: false,
+                      labelText: _user.userLoginData["email"],
+                      color: kLight,
+                      textFieldStyle: GoogleFonts.roboto(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w400,
+                        color: kPrimary,
+                      ),
+                      hintStyleStyle: GoogleFonts.roboto(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w400,
+                        color: kPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 10.0),
+                  child: Row(
+                    children: [
+                      Expanded(
                         child: inputTextField(
-                          controller: _merchantNameController,
-                          focusNode: _merchantNameFocus,
-                          // obscureText: true,
-                          hasError: false,
-                          labelText: "Merchant Name",
+                          controller: _firstNameController,
+                          focusNode: _firstNameFocus,
                           color: kLight,
+                          hasError: false,
+                          labelText: "Firstname",
                           textFieldStyle: GoogleFonts.roboto(
-                            fontSize: 14.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.w400,
                             color: kPrimary,
                           ),
                           hintStyleStyle: GoogleFonts.roboto(
-                            fontSize: 14.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.w400,
                             color: kPrimary,
                           ),
                         ),
                       ),
-                _global.registrationProperties["accountType"] == "merchant"
-                    ? Container(
-                        margin: const EdgeInsets.only(top: 10.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextButton(
-                                onPressed: () => selectServiceHrs("open"),
-                                child: Text(
-                                  _openTime,
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 14.0,
-                                    fontWeight: _openTime == "Select Open Time"
-                                        ? FontWeight.w400
-                                        : FontWeight.bold,
-                                    color: kLight,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            _openTime != "Select Open Time"
-                                ? Text(
-                                    "to",
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w400,
-                                      color: kLight.withOpacity(0.5),
-                                    ),
-                                  )
-                                : const SizedBox(),
-                            Expanded(
-                              child: TextButton(
-                                onPressed: () => selectServiceHrs("close"),
-                                child: Text(
-                                  _closingTime,
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 14.0,
-                                    fontWeight:
-                                        _closingTime == "Select Closing Time"
-                                            ? FontWeight.w400
-                                            : FontWeight.bold,
-                                    color: kLight,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ],
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: inputTextField(
+                          controller: _lastNameController,
+                          focusNode: _lastNameFocus,
+                          hasError: false,
+                          labelText: "Lastname",
+                          color: kLight,
+                          textFieldStyle: GoogleFonts.roboto(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w400,
+                            color: kPrimary,
+                          ),
+                          hintStyleStyle: GoogleFonts.roboto(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w400,
+                            color: kPrimary,
+                          ),
                         ),
-                      )
-                    : const SizedBox(),
+                      ),
+                    ],
+                  ),
+                ),
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.only(top: 10.0),
@@ -436,43 +277,61 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
                     controller: _contactController,
                     focusNode: _contactFocus,
                     hasError: false,
-                    labelText: "Contact Number",
+                    labelText: "Mobile Number",
                     color: kLight,
-                    textFieldStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
+                    textFieldStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
-                    hintStyleStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
+                    hintStyleStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
                   ),
                 ),
                 Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(top: 10.0),
-                  child: inputTextArea(
-                    controller: _addressController,
-                    focusNode: _addressFocus,
-                    // obscureText: true,
-                    hasError: false,
-                    labelText: "Address",
-                    color: kLight,
-                    textFieldStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: kPrimary,
-                    ),
-                    hintStyleStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w400,
-                      color: kPrimary,
+                  margin: const EdgeInsets.only(top: 5.0),
+                  child: TextButton(
+                    onPressed: () => onLocationSync(),
+                    child: Text(
+                      "Tap to Sync Address",
+                      style: GoogleFonts.roboto(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.left,
                     ),
                   ),
                 ),
-                const Spacer(flex: 2),
+                IgnorePointer(
+                  ignoring: true,
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(top: 5.0),
+                    child: inputTextArea(
+                      controller: _addressController,
+                      focusNode: _addressFocus,
+                      // obscureText: true,
+                      hasError: false,
+                      labelText: "Address",
+                      color: kLight,
+                      textFieldStyle: GoogleFonts.roboto(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w400,
+                        color: kPrimary,
+                      ),
+                      hintStyleStyle: GoogleFonts.roboto(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w400,
+                        color: kPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+                const Spacer(),
                 SizedBox(
                   width: double.infinity,
                   height: 62,
@@ -480,22 +339,22 @@ class _RegisterAccountProfileState extends State<RegisterAccountProfile> {
                     onPressed: () => onProceed(),
                     style: TextButton.styleFrom(
                       //primary: kFadeWhite,
-                      backgroundColor: kLight,
+                      backgroundColor: kSecondary,
                       shape: const RoundedRectangleBorder(
                         borderRadius: kDefaultRadius,
                       ),
                     ),
                     child: Text(
-                      "PROCEED",
+                      "SAVE PROFILE",
                       style: GoogleFonts.roboto(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w400,
-                        color: kPrimary,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                        color: kLight,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 70.0),
+                const SizedBox(height: 20.0),
               ],
             ),
           ),

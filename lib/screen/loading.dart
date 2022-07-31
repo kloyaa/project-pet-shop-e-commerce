@@ -14,7 +14,7 @@ class _LoadingState extends State<Loading> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => false,
-      child: const Scaffold(
+      child: Scaffold(
         backgroundColor: kLight,
         body: Center(
           child: SizedBox(

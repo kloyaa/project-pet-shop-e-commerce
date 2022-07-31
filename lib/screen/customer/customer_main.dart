@@ -122,7 +122,7 @@ class _CustomerMainState extends State<CustomerMain> {
             decoration: BoxDecoration(
               color: kPrimary,
               image: DecorationImage(
-                image: NetworkImage(_profile.data["img"]),
+                image: NetworkImage(_profile.data["avatar"]),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   kPrimary.withOpacity(0.7),

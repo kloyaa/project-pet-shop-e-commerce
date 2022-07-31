@@ -1,5 +1,5 @@
 import 'package:app/common/print.dart';
-import 'package:app/const/url.dart';
+import 'package:app/const/uri.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 

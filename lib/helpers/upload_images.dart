@@ -1,4 +1,4 @@
-import 'package:app/const/url.dart';
+import 'package:app/const/uri.dart';
 import 'package:app/controllers/profileController.dart';
 import 'package:dio/dio.dart' as http;
 import 'package:get/get.dart';
