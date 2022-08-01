@@ -153,21 +153,7 @@ class _CustomerMainState extends State<CustomerMain> {
               ),
             ),
           ),
-          // ListTile(
-          //   onTap: () => _user.logout(),
-          //   leading: const Icon(
-          //     AntDesign.user,
-          //     size: 20.0,
-          //     color: kDark,
-          //   ),
-          //   title: Text(
-          //     "Profile",
-          //     style: GoogleFonts.chivo(
-          //       fontSize: 14.0,
-          //       color: kDark,
-          //     ),
-          //   ),
-          // ),
+
           // const Divider(),
           ListTile(
             onTap: () => Get.toNamed("/customer-orders"),
@@ -178,8 +164,8 @@ class _CustomerMainState extends State<CustomerMain> {
             ),
             title: Text(
               "My Orders",
-              style: GoogleFonts.chivo(
-                fontSize: 14.0,
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
                 color: kDark,
               ),
             ),
@@ -193,14 +179,29 @@ class _CustomerMainState extends State<CustomerMain> {
                   ),
                   title: Text(
                     "Cart",
-                    style: GoogleFonts.chivo(
-                      fontSize: 14.0,
+                    style: GoogleFonts.roboto(
+                      fontSize: 12.0,
                       color: kDark,
                     ),
                   ),
                 )
               : const SizedBox(),
           const Spacer(flex: 5),
+          ListTile(
+            onTap: () => Get.toNamed("/register-as-merchant"),
+            leading: const Icon(
+              MaterialCommunityIcons.store_outline,
+              size: 24.0,
+              color: kDark,
+            ),
+            title: Text(
+              "I want to sell",
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
+                color: kDark,
+              ),
+            ),
+          ),
           ListTile(
             onTap: () => _user.logout(),
             leading: Icon(
@@ -210,8 +211,8 @@ class _CustomerMainState extends State<CustomerMain> {
             ),
             title: Text(
               "Log out",
-              style: GoogleFonts.chivo(
-                fontSize: 14.0,
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
                 color: kDark,
               ),
             ),

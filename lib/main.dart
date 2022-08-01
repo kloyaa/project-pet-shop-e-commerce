@@ -5,6 +5,7 @@ import 'package:app/screen/account/registration/account.dart';
 import 'package:app/screen/account/registration/accountPicture.dart';
 import 'package:app/screen/account/registration/accountProfile.dart';
 import 'package:app/screen/account/registration/accountType.dart';
+import 'package:app/screen/account/registration/merchant/merchantProfile.dart';
 import 'package:app/screen/customer/customer_main.dart';
 import 'package:app/screen/customer/sub/customer_orders.dart';
 import 'package:app/screen/customer/sub/customer_shopping_cart.dart';
@@ -94,5 +95,9 @@ final List<GetPage<dynamic>> registration = [
   GetPage(
     name: "/register-account-picture",
     page: () => const RegisterAccountPicture(),
-  )
+  ),
+  GetPage(
+    name: "/register-as-merchant",
+    page: () => const RegisterAsMerchant(),
+  ),
 ];
