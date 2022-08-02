@@ -65,7 +65,7 @@ const getProfile = async (req, res) => {
       .select({ _id: 0, __v: 0 })
       .then((value) => {
         if (!value)
-          return res.status(400).json({ message: "accountId not found" });
+          return res.status(400).json({ message: "merchant accountId not found" });
         return res.status(200).json(value);
       })
       .catch((err) => res.status(400).json(err));
