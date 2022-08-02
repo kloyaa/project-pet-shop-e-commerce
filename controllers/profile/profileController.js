@@ -12,7 +12,7 @@ const deleteProfile = async (req, res) => {
       .then((value) => console.log("Merchant", value))
       .catch((err) => cossole.log(err));
     
-    Rider.findOneAndRemove({ accountId });
+    Rider.findOneAndRemove({ accountId })
       .then((value) => console.log("Rider", value))
       .catch((err) => cossole.log(err));
     
