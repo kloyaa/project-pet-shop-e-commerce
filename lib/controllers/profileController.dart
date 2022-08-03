@@ -1,5 +1,6 @@
 import 'package:app/common/print.dart';
 import 'package:app/const/uri.dart';
+import 'package:app/controllers/userController.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -11,26 +12,20 @@ class ProfileController extends GetxController {
   Map data = {};
 
   Future<void> getProfile(String id) async {
-    try {
-      final _response = await Dio().get(
-        baseUrl + "/profile/customer/$id",
-      );
-      data = _response.data;
-
-      prettyPrint("PROFILE", _response.data);
-
-      Get.toNamed("/customer-main");
-    } on DioError catch (e) {
-      Get.toNamed("/register-account-profile");
-      if (kDebugMode) {
-        prettyPrint("getProfile()", e.response!.data);
-      }
-    }
+    await Dio()
+        .get(baseUrl + "/profile/customer/$id")
+        .then((value) => isCustomer(value))
+        .catchError((errror) async => await Dio()
+            .get(baseUrl + "/profile/merchant/$id")
+            .then((value) => isMerchant(value))
+            .catchError((errror) => Get.toNamed("/register-account-profile")));
   }
 
   Future<dynamic> getMerchantProfile(String id) async {
     try {
-      final _getProfileResponse = await Dio().get(baseUrl + "/profile/$id");
+      final _getProfileResponse = await Dio().get(
+        baseUrl + "/profile/merchant/$id",
+      );
       return _getProfileResponse.data;
     } on DioError catch (e) {
       if (kDebugMode) {
@@ -60,7 +55,14 @@ class ProfileController extends GetxController {
 
   Future<dynamic> createProfile(userType) async {
     try {
+      prettyPrint("createProfileData", createProfileData);
+
       Get.toNamed("/loading");
+
+      /* 
+      * CUSTOMER
+      * Description: Create Customer Profile
+      */
       if (userType == "customer") {
         // CREATE PROFILE
         await Dio().post(
@@ -88,12 +90,59 @@ class ProfileController extends GetxController {
 
         return Get.toNamed("/customer-main");
       }
-      if (userType == "merchant") {}
+
+      /* 
+      * MERCHANT
+      * Description: Create Merchant Profile
+      */
+      if (userType == "merchant") {
+        final _loginData = Get.put(UserController());
+
+        // DELETE EXISTING PROFILE
+        await Dio().delete(
+          baseUrl + "/profile/g/${_loginData.userLoginData["accountId"]}",
+        );
+        // CREATE PROFILE
+        await Dio().post(
+          baseUrl + "/profile/merchant",
+          data: {
+            ...createProfileData,
+            "visibility": true,
+            "verified": false,
+          },
+        );
+        // UPDATE PROFILE AVATAR
+        await Dio().put(
+          baseUrl + "/profile/merchant/avatar",
+          data: http.FormData.fromMap({
+            "accountId": createProfileData["accountId"],
+            'img': await http.MultipartFile.fromFile(
+              createProfileData["img"]["path"],
+              filename: createProfileData["img"]["name"],
+              contentType: MediaType("image", "jpeg"), //important
+            ),
+          }),
+        );
+
+        // LOGOUT
+        Get.put(UserController()).logout();
+      }
       if (userType == "rider") {}
     } on DioError catch (e) {
       if (kDebugMode) {
-        prettyPrint("createProfile()", e.response!.data);
+        Get.back();
+        print(e);
       }
     }
+  }
+
+  dynamic isMerchant(value) {
+    data = value.data;
+    return Get.toNamed("/merchant-main");
+  }
+
+  dynamic isCustomer(value) {
+    data = value.data;
+    return Get.toNamed("/customer-main");
   }
 }

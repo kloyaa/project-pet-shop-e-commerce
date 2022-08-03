@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 class OrderController extends GetxController {
   Future<dynamic> getCustomerOrders(query) async {
     final _orderResponse = await Dio().get(
-      baseUrl + "/order",
+      baseUrl + "/checkout/get-by-customers?accountId=1&status=to-pack",
       queryParameters: query,
     );
     return _orderResponse.data;

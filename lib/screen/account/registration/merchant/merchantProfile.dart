@@ -1,4 +1,5 @@
 import 'package:app/common/destroyTextFieldFocus.dart';
+import 'package:app/common/print.dart';
 import 'package:app/const/colors.dart';
 import 'package:app/const/material.dart';
 import 'package:app/controllers/globalController.dart';
@@ -8,7 +9,6 @@ import 'package:app/services/location_coordinates.dart';
 import 'package:app/services/location_name.dart';
 import 'package:app/widget/form.dart';
 import 'package:bottom_picker/bottom_picker.dart';
-import 'package:bottom_picker/resources/arrays.dart';
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -31,11 +31,8 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
   late TextEditingController _emailController;
   late FocusNode _emailFocus;
 
-  late TextEditingController _firstNameController;
-  late FocusNode _firstNameFocus;
-
-  late TextEditingController _lastNameController;
-  late FocusNode _lastNameFocus;
+  late TextEditingController _nameController;
+  late FocusNode _nameFocus;
 
   late TextEditingController _contactController;
   late FocusNode _contactFocus;
@@ -46,23 +43,31 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
   late TextEditingController _merchantNameController;
   late FocusNode _merchantNameFocus;
 
+  String _openTime = "Select Open Time";
+  String _closingTime = "Select Closing Time";
+
   Future<void> onProceed() async {
-    final _firstName = _firstNameController.text.trim();
-    final _lastName = _lastNameController.text.trim();
-    final _address = _addressController.text.trim();
+    final _name = _nameController.text.trim();
 
     final _contact = _contactController.text.trim().replaceAll(r' ', "");
 
     // VALIDATE
-    if (_firstName.isEmpty) {
-      return _firstNameFocus.requestFocus();
+    if (_name.isEmpty) {
+      return _nameFocus.requestFocus();
     }
-    if (_lastName.isEmpty) {
-      return _lastNameFocus.requestFocus();
-    }
+
     if (_contact.isEmpty) {
       return _contactFocus.requestFocus();
     }
+
+    if (_openTime == "Select Open Time") {
+      return selectServiceHrs("open");
+    }
+    if (_closingTime == "Select Closing Time") {
+      return selectServiceHrs("close");
+    }
+
+    final serviceHrs = _openTime + " to " + _closingTime;
 
     final _locationCoordinates = await getLocation();
     final _locationName = await getLocationName(
@@ -71,13 +76,11 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
     );
 
     // ASSIGN VALUE TO GLOBAL STATE
+    _profile.createProfileData.clear();
     _profile.createProfileData.addAll(
       {
         "accountId": _user.userLoginData["accountId"],
-        "name": {
-          "first": _firstName,
-          "last": _lastName,
-        },
+        "name": _name,
         "contact": {
           "email": _user.userLoginData["email"],
           "number": _contact,
@@ -89,13 +92,16 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
             "latitude": _locationCoordinates?.latitude
           }
         },
+        "serviceHrs": serviceHrs,
         "verified": false,
         "visibility": true
       },
     );
 
+    prettyPrint("createProfileData", _profile.createProfileData);
+
     // REDIRECT
-    Get.toNamed("/register-account-picture");
+    Get.toNamed("/register-as-merchant-banner");
   }
 
   void onLocationSync() async {
@@ -109,14 +115,70 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
     _addressController.text = "${_location.street}, ${_location.locality}";
   }
 
+  void selectServiceHrs(type) {
+    if (type == "open") {
+      return BottomPicker.time(
+        height: Get.height * 0.50,
+        title: "Select Opening Time",
+        buttonAlignement: MainAxisAlignment.end,
+        buttonSingleColor: kPrimary,
+        pickerTextStyle: GoogleFonts.roboto(
+          fontSize: 13.0,
+          fontWeight: FontWeight.w400,
+          color: kPrimary,
+        ),
+        titleStyle: GoogleFonts.roboto(
+          fontSize: 14.0,
+          fontWeight: FontWeight.w600,
+          color: kPrimary,
+        ),
+        onSubmit: (date) {
+          setState(() {
+            _openTime = Jiffy(date).jm;
+          });
+        },
+        onClose: () {
+          print("Picker closed");
+        },
+        use24hFormat: false,
+      ).show(context);
+    }
+    if (type == "close") {
+      return BottomPicker.time(
+        height: Get.height * 0.50,
+        title: "Select Closing Time",
+        buttonAlignement: MainAxisAlignment.end,
+        buttonSingleColor: kPrimary,
+        pickerTextStyle: GoogleFonts.roboto(
+          fontSize: 13.0,
+          fontWeight: FontWeight.w400,
+          color: kPrimary,
+        ),
+        titleStyle: GoogleFonts.roboto(
+          fontSize: 14.0,
+          fontWeight: FontWeight.w600,
+          color: kPrimary,
+        ),
+        onSubmit: (date) {
+          setState(() {
+            _closingTime = Jiffy(date).jm;
+          });
+        },
+        onClose: () {
+          print("Picker closed");
+        },
+        use24hFormat: false,
+      ).show(context);
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _firstNameController = TextEditingController();
-    _firstNameFocus = FocusNode();
-    _lastNameController = TextEditingController();
-    _lastNameFocus = FocusNode();
+    _nameController = TextEditingController();
+    _nameFocus = FocusNode();
+
     _contactController = MaskedTextController(mask: '0000 000 0000');
     _contactFocus = FocusNode();
     _addressController = TextEditingController();
@@ -132,10 +194,9 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _firstNameController.dispose();
-    _firstNameFocus.dispose();
-    _lastNameController.dispose();
-    _lastNameFocus.dispose();
+    _nameController.dispose();
+    _nameFocus.dispose();
+
     _contactController.dispose();
     _contactFocus.dispose();
     _addressController.dispose();
@@ -149,7 +210,7 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
   @override
   Widget build(BuildContext context) {
     final _title = Text(
-      "Profile Setup",
+      "Store Profile",
       style: GoogleFonts.chivo(
         fontWeight: FontWeight.bold,
         color: kLight,
@@ -157,12 +218,35 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
       ),
     );
     final _subTitle = Text(
-      "It’s quick and easy.",
+      "Update your new info",
       style: GoogleFonts.roboto(
         fontSize: 12.0,
         fontWeight: FontWeight.w300,
         color: kLight,
       ),
+    );
+    final _appBar = AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [_title, _subTitle],
+      ),
+      backgroundColor: kPrimary,
+      elevation: 0,
+      leading: const SizedBox(),
+      leadingWidth: 0.0,
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 15.0),
+          child: IconButton(
+            onPressed: () => Get.back(),
+            splashRadius: 20.0,
+            icon: const Icon(
+              AntDesign.close,
+              color: kLight,
+            ),
+          ),
+        )
+      ],
     );
 
     return WillPopScope(
@@ -172,29 +256,7 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: kPrimary,
-          appBar: AppBar(
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_title, _subTitle],
-            ),
-            backgroundColor: kPrimary,
-            elevation: 0,
-            leading: const SizedBox(),
-            leadingWidth: 0.0,
-            actions: [
-              Container(
-                margin: const EdgeInsets.only(right: 15.0),
-                child: IconButton(
-                  onPressed: () => Get.back(),
-                  splashRadius: 20.0,
-                  icon: const Icon(
-                    AntDesign.close,
-                    color: kLight,
-                  ),
-                ),
-              )
-            ],
-          ),
+          appBar: _appBar,
           body: Container(
             margin: kDefaultBodyPadding,
             child: Column(
@@ -228,8 +290,8 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
                   width: double.infinity,
                   margin: const EdgeInsets.only(top: 10.0),
                   child: inputTextField(
-                    controller: _lastNameController,
-                    focusNode: _lastNameFocus,
+                    controller: _nameController,
+                    focusNode: _nameFocus,
                     hasError: false,
                     labelText: "Name",
                     color: kLight,
@@ -304,6 +366,56 @@ class _RegisterAsMerchantState extends State<RegisterAsMerchant> {
                         color: kPrimary,
                       ),
                     ),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  margin: const EdgeInsets.only(top: 10.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => selectServiceHrs("open"),
+                          child: Text(
+                            _openTime,
+                            style: GoogleFonts.roboto(
+                              fontSize: 12.0,
+                              fontWeight: _openTime == "Select Open Time"
+                                  ? FontWeight.w400
+                                  : FontWeight.bold,
+                              color: kLight,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      _openTime != "Select Open Time"
+                          ? Text(
+                              "to",
+                              style: GoogleFonts.roboto(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w400,
+                                color: kLight.withOpacity(0.5),
+                              ),
+                            )
+                          : const SizedBox(),
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => selectServiceHrs("close"),
+                          child: Text(
+                            _closingTime,
+                            style: GoogleFonts.roboto(
+                              fontSize: 12.0,
+                              fontWeight: _closingTime == "Select Closing Time"
+                                  ? FontWeight.w400
+                                  : FontWeight.bold,
+                              color: kLight,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const Spacer(),

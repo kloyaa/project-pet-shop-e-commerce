@@ -57,8 +57,8 @@ class _MerchantPostedItemsState extends State<MerchantPostedItems> {
     final _appBar = AppBar(
       title: Text(
         "Posted Items",
-        style: GoogleFonts.chivo(
-          fontSize: 16.0,
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
           color: kDark,
         ),
       ),
@@ -170,8 +170,6 @@ class _MerchantPostedItemsState extends State<MerchantPostedItems> {
                                 padding: const EdgeInsets.only(left: 10),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
                                       crossAxisAlignment:
@@ -208,13 +206,15 @@ class _MerchantPostedItemsState extends State<MerchantPostedItems> {
                                               Radius.circular(5),
                                             ),
                                             border: Border.all(
-                                                color: kDark, width: 1),
+                                              color: kDark,
+                                              width: 0.5,
+                                            ),
                                           ),
                                           child: Text(
-                                            "Quantity ${_qty}x",
+                                            "QTY x$_qty",
                                             style: GoogleFonts.roboto(
-                                              fontSize: 10.0,
-                                              fontWeight: FontWeight.w400,
+                                              fontSize: 8.0,
+                                              fontWeight: FontWeight.w300,
                                               color: kDark,
                                             ),
                                           ),
@@ -224,7 +224,7 @@ class _MerchantPostedItemsState extends State<MerchantPostedItems> {
                                     Text(
                                       "P$_price",
                                       style: GoogleFonts.robotoMono(
-                                        fontSize: 17.0,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.bold,
                                         color: kDanger,
                                       ),

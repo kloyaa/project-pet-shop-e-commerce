@@ -34,6 +34,7 @@ class UserController extends GetxController {
       // GET PROFILE
       await _profile.getProfile(userLoginData["accountId"]);
     } on DioError catch (e) {
+      print(e.response!.statusMessage);
       Get.back();
       if (e.response!.statusCode == 400) {
         throw Error();

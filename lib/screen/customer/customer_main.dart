@@ -74,8 +74,8 @@ class _CustomerMainState extends State<CustomerMain> {
     final _appBar = AppBar(
       title: Text(
         "Welcome Back, ${_profile.data["name"]["first"]}!",
-        style: GoogleFonts.chivo(
-          fontSize: 16.0,
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
           color: kDark,
         ),
       ),
@@ -195,7 +195,7 @@ class _CustomerMainState extends State<CustomerMain> {
               color: kDark,
             ),
             title: Text(
-              "I want to sell",
+              "Start Selling",
               style: GoogleFonts.roboto(
                 fontSize: 12.0,
                 color: kDark,
@@ -303,7 +303,7 @@ class _CustomerMainState extends State<CustomerMain> {
                                     width: 200.0,
                                     child: CachedNetworkImage(
                                       imageUrl: _img,
-                                      fit: BoxFit.contain,
+                                      fit: BoxFit.cover,
                                       alignment: Alignment.topCenter,
                                     ),
                                   ),

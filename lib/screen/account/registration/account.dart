@@ -71,7 +71,9 @@ class _RegisterAccountState extends State<RegisterAccount> {
     _passwordController = TextEditingController();
     _passwordFocus = FocusNode();
 
-    _emailController.text = "madridano.kolya@gmail.com";
+    // _emailController.text = "madridano.kolya@gmail.com";
+    // _passwordController.text = "password";
+    _emailController.text = "pet.supplies@gmail.com";
     _passwordController.text = "password";
   }
 

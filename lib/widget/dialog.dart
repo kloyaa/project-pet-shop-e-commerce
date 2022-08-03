@@ -31,16 +31,6 @@ Future dialogLoading(BuildContext context) async {
                     strokeWidth: 3,
                   ),
                 ),
-                const SizedBox(height: 25.0),
-                Text(
-                  "We are Uploading your images \nto a secured cloud, Please wait.",
-                  style: GoogleFonts.roboto(
-                    color: kPrimary,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w300,
-                  ),
-                  textAlign: TextAlign.center,
-                )
               ],
             ),
           ),

@@ -11,7 +11,7 @@ Future<List<Map>> uploadImages(images) async {
 
     for (final image in images) {
       final _uploadResponse = await http.Dio().post(
-        baseUrl + "/merchant/listing/upload",
+        baseUrl + "/product/upload",
         data: http.FormData.fromMap({
           "merchantName": _profile.data["merchantName"],
           "img": await http.MultipartFile.fromFile(

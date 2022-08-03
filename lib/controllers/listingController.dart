@@ -6,16 +6,15 @@ import 'package:get/get.dart';
 class ListingController extends GetxController {
   Map selectedListing = {};
 
-  Future<void> createListing(data) async {
-    await Dio().post(baseUrl + "/merchant/listing", data: data);
+  Future<void> createProduct(data) async {
+    await Dio().post(baseUrl + "/product", data: data);
   }
 
   Future<dynamic> getListings({String? merchantId}) async {
     if (merchantId!.isNotEmpty) {
       final _listingsResponse = await Dio().get(
-        baseUrl + "/merchant/listing",
+        baseUrl + "/product",
         queryParameters: {
-          "type": "byMerchant",
           "accountId": merchantId,
           "availability": true,
         },
@@ -24,9 +23,8 @@ class ListingController extends GetxController {
     }
     final _profile = Get.put(ProfileController());
     final _listingsResponse = await Dio().get(
-      baseUrl + "/merchant/listing",
+      baseUrl + "/product",
       queryParameters: {
-        "type": "byMerchant",
         "accountId": _profile.data["accountId"],
         "availability": true,
       },
@@ -51,6 +49,6 @@ class ListingController extends GetxController {
   }
 
   Future<void> deleteListing(id) async {
-    await Dio().delete(baseUrl + "/merchant/listing/$id");
+    await Dio().delete(baseUrl + "/product/$id");
   }
 }

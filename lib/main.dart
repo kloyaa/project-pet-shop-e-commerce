@@ -5,6 +5,7 @@ import 'package:app/screen/account/registration/account.dart';
 import 'package:app/screen/account/registration/accountPicture.dart';
 import 'package:app/screen/account/registration/accountProfile.dart';
 import 'package:app/screen/account/registration/accountType.dart';
+import 'package:app/screen/account/registration/merchant/merchantBanner.dart';
 import 'package:app/screen/account/registration/merchant/merchantProfile.dart';
 import 'package:app/screen/customer/customer_main.dart';
 import 'package:app/screen/customer/sub/customer_orders.dart';
@@ -24,8 +25,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -99,5 +98,9 @@ final List<GetPage<dynamic>> registration = [
   GetPage(
     name: "/register-as-merchant",
     page: () => const RegisterAsMerchant(),
+  ),
+  GetPage(
+    name: "/register-as-merchant-banner",
+    page: () => const RegisterAsMerchantBanner(),
   ),
 ];

@@ -1,3 +1,4 @@
+import 'package:app/common/print.dart';
 import 'package:app/const/colors.dart';
 import 'package:app/const/material.dart';
 import 'package:app/const/strings.dart';
@@ -5,6 +6,7 @@ import 'package:app/controllers/cartController.dart';
 import 'package:app/controllers/listingController.dart';
 import 'package:app/controllers/profileController.dart';
 import 'package:app/helpers/generate_minmax.dart';
+import 'package:app/services/location_distance_between.dart';
 import 'package:app/widget/bottomsheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -81,6 +83,26 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
       "/customer-view-product",
       preventDuplicates: false,
     );
+  }
+
+  onCalculateDistanceBetween(merchantCoord) {
+    final _from = _profile.data["address"]["coordinates"];
+    final _to = merchantCoord;
+
+    print({_from, _to});
+    final double distanceBetween = getDistanceBetween(
+      type: "kilometer",
+      location1: [
+        double.parse(_from["latitude"]),
+        double.parse(_from["longitude"])
+      ],
+      location2: [
+        double.parse(_to["latitude"]),
+        double.parse(_to["longitude"]),
+      ],
+    );
+
+    return distanceBetween.toStringAsFixed(0);
   }
 
   @override
@@ -225,7 +247,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: Divider()),
+          //const SliverToBoxAdapter(child: Divider()),
           SliverToBoxAdapter(
             child: FutureBuilder(
               future: _getMerchant,
@@ -240,6 +262,12 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                   return const SizedBox();
                 }
                 if (snapshot.connectionState == ConnectionState.done) {
+                  final _distanceBetween = onCalculateDistanceBetween(
+                    snapshot.data["address"]["coordinates"],
+                  );
+                  final _fee = int.parse(snapshot.data["feePerKilometer"]);
+                  final _sum = _fee * int.parse(_distanceBetween);
+
                   if (snapshot.data.length == 0) {
                     return const SizedBox();
                   }
@@ -247,37 +275,44 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
 
                 return Container(
                   padding: const EdgeInsets.all(20.0),
-                  color: kLight,
-                  child: Row(
+                  color: kSecondary,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        onPressed: () {
-                          print("VIEW STORE");
-                        },
-                        icon: const Icon(
-                          MaterialCommunityIcons.store,
-                          color: kDark,
+                      Text(
+                        snapshot.data["name"],
+                        style: GoogleFonts.roboto(
+                          color: kWhite,
+                          fontSize: 15.0,
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            snapshot.data["merchantName"],
-                            style: GoogleFonts.roboto(
-                              color: kDark,
-                              fontSize: 15.0,
-                            ),
-                          ),
-                          Text(
-                            snapshot.data["address"]["name"],
-                            style: GoogleFonts.roboto(
-                              color: kDark,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        snapshot.data["address"]["name"],
+                        style: GoogleFonts.roboto(
+                          color: kWhite,
+                          fontSize: 10.0,
+                        ),
                       ),
+                      const SizedBox(height: 5),
+                      snapshot.data["riderStatus"] == "active"
+                          ? Row(
+                              children: [
+                                const Icon(
+                                  MaterialCommunityIcons.truck_delivery_outline,
+                                  color: kWhite,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  ".00",
+                                  style: GoogleFonts.roboto(
+                                    color: kWhite,
+                                    fontSize: 12.0,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : SizedBox()
                     ],
                   ),
                 );

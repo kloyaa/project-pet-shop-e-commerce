@@ -13,7 +13,7 @@ bottomSheet({message, required BottomSheetType type, action}) {
         padding: const EdgeInsets.all(25.0),
         child: Text(
           message,
-          style: GoogleFonts.roboto(color: kWhite),
+          style: GoogleFonts.roboto(color: kWhite, fontSize: 12),
         ),
       ),
       backgroundColor: kPrimary,

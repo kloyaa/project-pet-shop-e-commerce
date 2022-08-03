@@ -87,8 +87,8 @@ class _MerchantOrdersState extends State<MerchantOrders>
     final _appBar = AppBar(
       title: Text(
         "Customer Orders",
-        style: GoogleFonts.chivo(
-          fontSize: 16.0,
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
           color: kDark,
         ),
       ),

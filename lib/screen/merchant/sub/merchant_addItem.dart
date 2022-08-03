@@ -35,7 +35,7 @@ class _MwerchantAddItemState extends State<MwerchantAddItem> {
 
   final List<Map> _images = [];
 
-  Future<void> onCreateListing() async {
+  Future<void> onAddProduct() async {
     dialogLoading(context);
 
     final _title = _titleController.text.trim();
@@ -51,7 +51,7 @@ class _MwerchantAddItemState extends State<MwerchantAddItem> {
       return _tileKey.currentState!.expand();
     }
 
-    await _listing.createListing({
+    await _listing.createProduct({
       "accountId": _profile.data["accountId"],
       "title": _title,
       "description": _description,
@@ -64,7 +64,7 @@ class _MwerchantAddItemState extends State<MwerchantAddItem> {
     Get.back();
     Future.delayed(const Duration(milliseconds: 500), () {
       bottomSheet(
-        message: "Your item was posted successfully!",
+        message: "Product added successfully!",
         type: BottomSheetType.toast,
       );
     });
@@ -93,9 +93,9 @@ class _MwerchantAddItemState extends State<MwerchantAddItem> {
   Widget build(BuildContext context) {
     final _appBar = AppBar(
       title: Text(
-        "Add Item",
-        style: GoogleFonts.chivo(
-          fontSize: 16.0,
+        "Add Product",
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
           color: kDark,
         ),
       ),
@@ -113,16 +113,16 @@ class _MwerchantAddItemState extends State<MwerchantAddItem> {
                 height: 10,
                 padding: const EdgeInsets.all(10.0),
                 child: ElevatedButton(
-                    onPressed: () => onCreateListing(),
+                    onPressed: () => onAddProduct(),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(0),
-                      primary: Colors.blueAccent,
+                      primary: kSecondary,
                       elevation: 0,
                     ),
                     child: Text(
                       "POST",
-                      style: GoogleFonts.chivo(
-                        fontSize: 12.0,
+                      style: GoogleFonts.roboto(
+                        fontSize: 10.0,
                         color: kLight,
                       ),
                     )),
@@ -202,14 +202,14 @@ class _MwerchantAddItemState extends State<MwerchantAddItem> {
                 title: Text(
                   "More Details",
                   style: GoogleFonts.chivo(
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                     color: kDark.withOpacity(0.8),
                   ),
                 ),
                 subtitle: Text(
-                  "Let customer have more idea about \nyour product",
-                  style: GoogleFonts.chivo(
-                    fontSize: 12.0,
+                  "Give customers an idea about your product",
+                  style: GoogleFonts.roboto(
+                    fontSize: 10.0,
                     color: kDark.withOpacity(0.8),
                   ),
                 ),

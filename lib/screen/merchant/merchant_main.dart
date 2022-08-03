@@ -3,6 +3,7 @@ import 'package:app/const/material.dart';
 import 'package:app/controllers/orderController.dart';
 import 'package:app/controllers/profileController.dart';
 import 'package:app/controllers/userController.dart';
+import 'package:app/screen/merchant/sub/merchant_qrCode.dart';
 import 'package:app/widget/snapshot.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,6 @@ class _MerchantMainState extends State<MerchantMain> {
     super.initState();
     _getOrders = _order.getCustomerOrders({
       "accountId": _profile.data["accountId"],
-      "accountType": "merchant",
       "status": "to-pack",
     });
   }
@@ -57,9 +57,9 @@ class _MerchantMainState extends State<MerchantMain> {
   Widget build(BuildContext context) {
     final _appBar = AppBar(
       title: Text(
-        _profile.data["merchantName"],
-        style: GoogleFonts.chivo(
-          fontSize: 16.0,
+        _profile.data["name"],
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
           color: kDark,
         ),
       ),
@@ -96,7 +96,7 @@ class _MerchantMainState extends State<MerchantMain> {
             decoration: BoxDecoration(
               color: kPrimary,
               image: DecorationImage(
-                image: NetworkImage(_profile.data["img"]),
+                image: NetworkImage(_profile.data["avatar"]),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   kPrimary.withOpacity(0.7),
@@ -109,7 +109,7 @@ class _MerchantMainState extends State<MerchantMain> {
               currentAccountPictureSize: const Size.square(70.0),
               margin: const EdgeInsets.all(0),
               accountName: Text(
-                _profile.data["merchantName"],
+                _profile.data["name"],
                 style: GoogleFonts.chivo(
                   color: Colors.white,
                   fontSize: 15.0,
@@ -125,22 +125,6 @@ class _MerchantMainState extends State<MerchantMain> {
               ),
             ),
           ),
-          // ListTile(
-          //   onTap: () => _user.logout(),
-          //   leading: const Icon(
-          //     AntDesign.user,
-          //     size: 20.0,
-          //     color: kDark,
-          //   ),
-          //   title: Text(
-          //     "Profile",
-          //     style: GoogleFonts.chivo(
-          //       fontSize: 14.0,
-          //       color: kDark,
-          //     ),
-          //   ),
-          // ),
-          // const Divider(),
           ListTile(
             onTap: () => Get.toNamed("/merchant-orders"),
             leading: const Icon(
@@ -150,8 +134,8 @@ class _MerchantMainState extends State<MerchantMain> {
             ),
             title: Text(
               "Customer Orders",
-              style: GoogleFonts.chivo(
-                fontSize: 14.0,
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
                 color: kDark,
               ),
             ),
@@ -165,8 +149,8 @@ class _MerchantMainState extends State<MerchantMain> {
             ),
             title: Text(
               "Add Item",
-              style: GoogleFonts.chivo(
-                fontSize: 14.0,
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
                 color: kDark,
               ),
             ),
@@ -180,13 +164,30 @@ class _MerchantMainState extends State<MerchantMain> {
             ),
             title: Text(
               "My Posted Items",
-              style: GoogleFonts.chivo(
-                fontSize: 14.0,
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
                 color: kDark,
               ),
             ),
           ),
           const Spacer(flex: 5),
+          ListTile(
+            onTap: () => Get.to(
+              () => MerchantQRCode(code: _user.userLoginData["accountId"]),
+            ),
+            leading: Icon(
+              MaterialCommunityIcons.qrcode_edit,
+              size: 24.0,
+              color: kDark.withOpacity(0.8),
+            ),
+            title: Text(
+              "Show QR Code",
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
+                color: kDark,
+              ),
+            ),
+          ),
           ListTile(
             onTap: () => _user.logout(),
             leading: Icon(
@@ -196,8 +197,8 @@ class _MerchantMainState extends State<MerchantMain> {
             ),
             title: Text(
               "Log out",
-              style: GoogleFonts.chivo(
-                fontSize: 14.0,
+              style: GoogleFonts.roboto(
+                fontSize: 12.0,
                 color: kDark,
               ),
             ),
@@ -214,7 +215,7 @@ class _MerchantMainState extends State<MerchantMain> {
             color: kPrimary,
             borderRadius: kDefaultRadius,
           ),
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(14.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -222,7 +223,6 @@ class _MerchantMainState extends State<MerchantMain> {
                 AntDesign.plus,
                 color: kLight,
               ),
-              const SizedBox(width: 5),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -230,14 +230,14 @@ class _MerchantMainState extends State<MerchantMain> {
                     "ADD ITEM",
                     style: GoogleFonts.chivo(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
+                      fontSize: 12.0,
                       color: kLight,
                     ),
                   ),
                   Text(
                     "Upload Products\nto my store",
-                    style: GoogleFonts.chivo(
-                      fontSize: 12.0,
+                    style: GoogleFonts.roboto(
+                      fontSize: 8.0,
                       color: kLight,
                     ),
                   ),
@@ -256,7 +256,7 @@ class _MerchantMainState extends State<MerchantMain> {
             color: Colors.deepPurple,
             borderRadius: kDefaultRadius,
           ),
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(14.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -264,7 +264,6 @@ class _MerchantMainState extends State<MerchantMain> {
                 Ionicons.receipt_outline,
                 color: kLight,
               ),
-              const SizedBox(width: 5),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -272,14 +271,14 @@ class _MerchantMainState extends State<MerchantMain> {
                     "MY ORDERS",
                     style: GoogleFonts.chivo(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
+                      fontSize: 12.0,
                       color: kLight,
                     ),
                   ),
                   Text(
                     "Manage and View \nCustomer Orders",
-                    style: GoogleFonts.chivo(
-                      fontSize: 12.0,
+                    style: GoogleFonts.roboto(
+                      fontSize: 8.0,
                       color: kLight,
                     ),
                   ),
@@ -297,7 +296,7 @@ class _MerchantMainState extends State<MerchantMain> {
           color: Colors.deepOrange,
           borderRadius: kDefaultRadius,
         ),
-        padding: const EdgeInsets.all(27.0),
+        padding: const EdgeInsets.all(14.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -313,14 +312,14 @@ class _MerchantMainState extends State<MerchantMain> {
                   "MY POSTED ITEMS",
                   style: GoogleFonts.chivo(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
+                    fontSize: 12.0,
                     color: kLight,
                   ),
                 ),
                 Text(
                   "View and Manage uploaded products",
                   style: GoogleFonts.chivo(
-                    fontSize: 12.0,
+                    fontSize: 10.0,
                     color: kLight,
                   ),
                 ),
