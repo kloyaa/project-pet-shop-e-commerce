@@ -1,7 +1,10 @@
+import 'package:app/common/print.dart';
 import 'package:app/const/colors.dart';
 import 'package:app/const/material.dart';
 import 'package:app/controllers/cartController.dart';
 import 'package:app/controllers/profileController.dart';
+import 'package:app/screen/customer/sub/customer_orders.dart';
+import 'package:app/services/location_distance_between.dart';
 import 'package:app/widget/bottomsheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +12,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CustomerShoppingCart extends StatefulWidget {
@@ -21,21 +25,25 @@ class CustomerShoppingCart extends StatefulWidget {
 class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
   final _cart = Get.put(CartController());
   final _profile = Get.put(ProfileController());
-
+  final _f = NumberFormat.currency(locale: 'en_US', name: "PHP");
   late Future _getMerchant;
   bool isCheckingOut = false;
 
   Future<void> onDeleteFromCart(id) async {
     _cart.remove(id);
+
     Future.delayed(const Duration(milliseconds: 200), () {
       bottomSheet(
         message: "Item removed from the cart.",
         type: BottomSheetType.toast,
       );
     });
+    if (_cart.items.isEmpty) {
+      return Get.toNamed("/customer-main");
+    }
   }
 
-  Future<void> onCheckout() async {
+  Future<void> onCheckout({total, deliveryFee}) async {
     setState(() {
       isCheckingOut = true;
     });
@@ -49,31 +57,55 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
           "lastName": _profile.data["name"]["last"],
           "contactNo": _profile.data["contact"]["number"],
           "address": _profile.data["address"]["name"],
-          "img": _profile.data["img"],
+          "avatar": _profile.data["avatar"],
         },
         "merchant": {
           "accountId": _cartMerchantId,
-          "name": _merchantProfile["merchantName"],
+          "name": _merchantProfile["name"],
           "contactNo": _merchantProfile["contact"]["number"],
           "address": _merchantProfile["address"]["name"],
-          "img": _merchantProfile["img"]
+          "avatar": _merchantProfile["avatar"]
         }
       },
       "content": {
         "items": [..._cart.items],
-        "total": _cart.total.value,
+        "total": total,
       },
+      "deliveryFee": deliveryFee,
       "status": "to-pack",
+      "estimatedDeliveryDateAndTime": "Tomorrow"
     };
     bottomSheet(
       message: "Order placed successfully!",
       type: BottomSheetType.toast,
     );
     await _cart.chekoutCart(data);
-    Get.toNamed("/customer-orders");
+    _cart.items.clear();
     setState(() {
       isCheckingOut = false;
     });
+    prettyPrint("Checkout", data);
+
+    Get.to(() => const CustomerOrders());
+  }
+
+  onCalculateDistanceBetween(merchantCoord) {
+    final _from = _profile.data["address"]["coordinates"];
+    final _to = merchantCoord;
+
+    final double distanceBetween = getDistanceBetween(
+      type: "kilometer",
+      location1: [
+        double.parse(_from["latitude"]),
+        double.parse(_from["longitude"])
+      ],
+      location2: [
+        double.parse(_to["latitude"]),
+        double.parse(_to["longitude"]),
+      ],
+    );
+
+    return distanceBetween.toStringAsFixed(0);
   }
 
   @override
@@ -93,8 +125,8 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
     final _appBar = AppBar(
       title: Text(
         "My Cart",
-        style: GoogleFonts.chivo(
-          fontSize: 16.0,
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
           color: kDark,
         ),
       ),
@@ -126,7 +158,7 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
@@ -136,12 +168,12 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                   ),
                   const SizedBox(width: 5),
                   SizedBox(
-                    width: 320,
                     child: Text(
                       _profile.data["address"]["name"],
                       style: GoogleFonts.roboto(
                         color: kDark,
                         fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -289,7 +321,7 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                   }
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const Icon(
                         MaterialCommunityIcons.store,
@@ -298,15 +330,15 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                       ),
                       const SizedBox(width: 5),
                       SizedBox(
-                        width: 320,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              snapshot.data["merchantName"],
+                              snapshot.data["name"],
                               style: GoogleFonts.roboto(
                                 color: kDark,
-                                fontSize: 15.0,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.bold,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -315,7 +347,7 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                               snapshot.data["address"]["name"],
                               style: GoogleFonts.roboto(
                                 color: kDark.withOpacity(0.5),
-                                fontSize: 10.0,
+                                fontSize: 8.0,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -333,6 +365,7 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
         preferredSize: const Size.fromHeight(95.0),
       ),
     );
+
     return Obx(() => Scaffold(
           appBar: _appBar,
           backgroundColor: kLight,
@@ -357,6 +390,7 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                         final _qty = _cart.items[index]["qty"];
                         final _price = _cart.items[index]["price"];
                         final _title = _cart.items[index]["title"];
+
                         return Container(
                           padding: kDefaultBodyMargin.copyWith(top: 20.0),
                           child: Slidable(
@@ -398,71 +432,67 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          _title,
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w400,
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 12),
+                                          child: Text(
+                                            _title,
+                                            style: GoogleFonts.roboto(
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 12),
+                                          child: Text(
+                                            _f.format(int.parse(_price) * _qty),
+                                            style: GoogleFonts.rajdhani(
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: kDanger,
+                                            ),
+                                          ),
                                         ),
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
                                           children: [
+                                            IconButton(
+                                                onPressed: () {
+                                                  if (_qty != 1) {
+                                                    _cart.updateQuantity(
+                                                      _cart.items[index]["_id"],
+                                                      "minus",
+                                                    );
+                                                  }
+                                                },
+                                                icon: Icon(
+                                                  AntDesign.minussquareo,
+                                                  color: kDark.withOpacity(0.5),
+                                                )),
                                             Text(
-                                              "P${int.parse(_price) * _qty}.00",
-                                              style: GoogleFonts.robotoMono(
-                                                fontSize: 17.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDanger,
+                                              _qty.toString(),
+                                              style: GoogleFonts.roboto(
+                                                fontSize: 10.0,
+                                                fontWeight: FontWeight.w400,
+                                                color: kDark,
                                               ),
                                             ),
-                                            Row(
-                                              children: [
-                                                IconButton(
-                                                    onPressed: () {
-                                                      if (_qty != 1) {
-                                                        _cart.updateQuantity(
-                                                          _cart.items[index]
-                                                              ["_id"],
-                                                          "minus",
-                                                        );
-                                                      }
-                                                    },
-                                                    icon: Icon(
-                                                      AntDesign.minussquareo,
-                                                      color: kDark
-                                                          .withOpacity(0.5),
-                                                    )),
-                                                Text(
-                                                  _qty.toString(),
-                                                  style: GoogleFonts.roboto(
-                                                    fontSize: 10.0,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: kDark,
-                                                  ),
-                                                ),
-                                                IconButton(
-                                                    onPressed: () =>
-                                                        _cart.updateQuantity(
-                                                          _cart.items[index]
-                                                              ["_id"],
-                                                          "add",
-                                                        ),
-                                                    icon: Icon(
-                                                      AntDesign.plussquareo,
-                                                      color: kDark
-                                                          .withOpacity(0.5),
-                                                    )),
-                                              ],
-                                            ),
+                                            IconButton(
+                                                onPressed: () =>
+                                                    _cart.updateQuantity(
+                                                      _cart.items[index]["_id"],
+                                                      "add",
+                                                    ),
+                                                icon: Icon(
+                                                  AntDesign.plussquareo,
+                                                  color: kDark.withOpacity(0.5),
+                                                )),
                                           ],
-                                        ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -478,79 +508,127 @@ class _CustomerShoppingCartState extends State<CustomerShoppingCart> {
                     ),
                   ),
           ),
-          bottomNavigationBar: BottomAppBar(
-            elevation: 0,
-            child: AnimatedOpacity(
-              duration: const Duration(seconds: 1),
-              opacity: isCheckingOut ? 0.3 : 1,
-              child: IgnorePointer(
-                ignoring: isCheckingOut ? true : false,
-                child: Container(
-                  padding: const EdgeInsets.all(15.0),
-                  height: 80.0,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: kDark.withOpacity(0.2),
-                        width: 0.5,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "SUBTOTAL: P${_cart.total.value}.00",
-                            style: GoogleFonts.robotoMono(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                              color: kDark,
-                              height: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            "Shipping Fee: Free",
-                            style: GoogleFonts.roboto(
-                              fontSize: 10.0,
-                              fontWeight: FontWeight.w400,
-                              color: kDark,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 50,
-                        width: 150,
-                        child: TextButton(
-                          onPressed: () => onCheckout(),
-                          style: TextButton.styleFrom(
-                            //primary: kFadeWhite,
-                            backgroundColor: kPrimary,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: kDefaultRadius,
-                            ),
-                          ),
-                          child: Text(
-                            "CHECKOUT",
-                            style: GoogleFonts.roboto(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w400,
-                              color: kWhite,
-                            ),
+          bottomNavigationBar: FutureBuilder(
+            future: _getMerchant,
+            builder: (context, AsyncSnapshot snapshot) {
+              String _distanceBetween = "";
+              String _subTotal = "";
+              int _fee = 0;
+              String _sum = "";
+
+              if (snapshot.connectionState == ConnectionState.none) {
+                return const SizedBox();
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox();
+              }
+              if (snapshot.data == null) {
+                return const SizedBox();
+              }
+              if (snapshot.connectionState == ConnectionState.done) {
+                _distanceBetween = onCalculateDistanceBetween(
+                  snapshot.data["address"]["coordinates"],
+                );
+                _fee = int.parse(snapshot.data["feePerKilometer"]);
+                int _calc = _fee * int.parse(_distanceBetween);
+
+                _sum = _calc == 0 ? _f.format(_fee) : _f.format(_calc);
+                _subTotal = _f.format(
+                  _cart.total.value +
+                      (int.parse(_distanceBetween) == 0
+                          ? _fee
+                          : (_fee * int.parse(_distanceBetween))),
+                );
+
+                if (snapshot.data.length == 0) {
+                  return const SizedBox();
+                }
+              }
+              return BottomAppBar(
+                child: AnimatedOpacity(
+                  duration: const Duration(seconds: 1),
+                  opacity: isCheckingOut ? 0.3 : 1,
+                  child: IgnorePointer(
+                    ignoring: isCheckingOut ? true : false,
+                    child: Container(
+                      padding: const EdgeInsets.all(15.0),
+                      height: 100.0,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: kDark.withOpacity(0.2),
+                            width: 0.5,
                           ),
                         ),
                       ),
-                    ],
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Fee /km: ${_f.format(int.parse(snapshot.data["feePerKilometer"]))} | ${_distanceBetween}km",
+                                style: GoogleFonts.roboto(
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.w400,
+                                  color: kDark.withOpacity(0.8),
+                                ),
+                              ),
+                              Text(
+                                "Delivery Fee: $_sum",
+                                style: GoogleFonts.roboto(
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.w400,
+                                  color: kDark.withOpacity(0.8),
+                                ),
+                              ),
+                              const SizedBox(height: 10.0),
+                              Text(
+                                _subTotal,
+                                style: GoogleFonts.robotoMono(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: kDark,
+                                  height: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 60,
+                            width: 120,
+                            child: TextButton(
+                              onPressed: () => onCheckout(
+                                total: _subTotal,
+                                deliveryFee: _sum,
+                              ),
+                              style: TextButton.styleFrom(
+                                //primary: kFadeWhite,
+                                backgroundColor: kPrimary,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: kDefaultRadius,
+                                ),
+                              ),
+                              child: Text(
+                                "CHECKOUT",
+                                style: GoogleFonts.roboto(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w400,
+                                  color: kWhite,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ));
   }

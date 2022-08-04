@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 class CustomerViewProduct extends StatefulWidget {
   const CustomerViewProduct({Key? key}) : super(key: key);
@@ -89,7 +90,6 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
     final _from = _profile.data["address"]["coordinates"];
     final _to = merchantCoord;
 
-    print({_from, _to});
     final double distanceBetween = getDistanceBetween(
       type: "kilometer",
       location1: [
@@ -133,6 +133,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
             expandedHeight: 400,
             stretch: true,
             backgroundColor: kLight,
+
             // leadingWidth: 0,
             // leading: const SizedBox(),
             //elevation: 0,
@@ -141,18 +142,18 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
               splashRadius: 20.0,
               icon: const Icon(
                 Ionicons.arrow_back_circle,
-                color: Colors.deepOrange,
+                color: kSecondary,
                 size: 32.0,
               ),
             ),
             pinned: true,
-            // title: Text(
-            //   "This is a title",
-            //   style: GoogleFonts.roboto(
-            //     color: kDark,
-            //     fontSize: 16.0,
-            //   ),
-            // ),
+            title: Text(
+              _listing.selectedListing["title"],
+              style: GoogleFonts.roboto(
+                color: kDark,
+                fontSize: 12.0,
+              ),
+            ),
             flexibleSpace: FlexibleSpaceBar(
               background: CarouselSlider(
                 items: images(_listing.selectedListing["images"]),
@@ -209,7 +210,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                         Text(
                           _listing.selectedListing["title"],
                           style: GoogleFonts.chivo(
-                            fontSize: 16.0,
+                            fontSize: 14.0,
                             color: kDark.withOpacity(0.8),
                           ),
                         ),
@@ -234,8 +235,8 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                               _listing.selectedListing["description"],
                               style: GoogleFonts.roboto(
                                 color: kDark,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w400,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w300,
                               ),
                             ),
                           ],
@@ -247,11 +248,12 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
               ),
             ),
           ),
-          //const SliverToBoxAdapter(child: Divider()),
           SliverToBoxAdapter(
             child: FutureBuilder(
               future: _getMerchant,
               builder: (context, AsyncSnapshot snapshot) {
+                int _fee = 0;
+                String _sum = "";
                 if (snapshot.connectionState == ConnectionState.none) {
                   return const SizedBox();
                 }
@@ -265,8 +267,14 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                   final _distanceBetween = onCalculateDistanceBetween(
                     snapshot.data["address"]["coordinates"],
                   );
-                  final _fee = int.parse(snapshot.data["feePerKilometer"]);
-                  final _sum = _fee * int.parse(_distanceBetween);
+                  final _f = NumberFormat.currency(
+                    locale: 'en_US',
+                    name: "PHP",
+                  );
+                  _fee = int.parse(snapshot.data["feePerKilometer"]);
+                  final int _calc = _fee * int.parse(_distanceBetween);
+
+                  _sum = _calc == 0 ? _f.format(_fee) : _f.format(_calc);
 
                   if (snapshot.data.length == 0) {
                     return const SizedBox();
@@ -304,7 +312,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
-                                  ".00",
+                                  _sum,
                                   style: GoogleFonts.roboto(
                                     color: kWhite,
                                     fontSize: 12.0,
@@ -364,13 +372,14 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                             color: kWhite,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
                                   width: 200.0,
                                   child: CachedNetworkImage(
                                     imageUrl: _img,
-                                    fit: BoxFit.contain,
-                                    alignment: Alignment.topCenter,
+                                    fit: BoxFit.cover,
+                                    height: 150,
                                   ),
                                 ),
                                 Container(
@@ -383,7 +392,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                                         _title,
                                         style: GoogleFonts.roboto(
                                           color: kDark,
-                                          fontSize: 13.0,
+                                          fontSize: 10.0,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -391,7 +400,7 @@ class _CustomerViewProductState extends State<CustomerViewProduct> {
                                       Text(
                                         "PHP $_price",
                                         style: GoogleFonts.rajdhani(
-                                          fontSize: 20.0,
+                                          fontSize: 14.0,
                                           fontWeight: FontWeight.bold,
                                           color: kDanger,
                                         ),

@@ -67,7 +67,7 @@ class _LoginState extends State<Login> {
 
     _emailController.text = "madridano.kolya@gmail.com";
     _passwordController.text = "password";
-    // _emailController.text = "pet.supplies@gmail.com";
+    // _emailController.text = "historia@gmail.com";
     // _passwordController.text = "password";
   }
 

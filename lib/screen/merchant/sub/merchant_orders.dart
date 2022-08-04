@@ -2,6 +2,7 @@ import 'package:app/const/colors.dart';
 import 'package:app/const/material.dart';
 import 'package:app/controllers/orderController.dart';
 import 'package:app/controllers/profileController.dart';
+import 'package:app/helpers/format_currency.dart';
 import 'package:app/widget/bottomsheet.dart';
 import 'package:app/widget/snapshot.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,10 +27,13 @@ class _MerchantOrdersState extends State<MerchantOrders>
   TabController? _tabController;
   late Future _getOrders;
 
-  final List<String> _buttonTtitle = ["Packed", "To Deliver", "Delivered"];
+  final List<String> _buttonTtitle = [
+    "Ready to Deliver",
+    "To Deliver",
+    "Delivered"
+  ];
   final List<Map> _tabTitle = [
     {"title": "To Pack", "tag": "to-pack"},
-    {"title": "Packed", "tag": "pack"},
     {"title": "To Deliver", "tag": "to-deliver"},
     {"title": "Delivered", "tag": "delivered"},
   ];
@@ -39,17 +43,22 @@ class _MerchantOrdersState extends State<MerchantOrders>
       type: BottomSheetType.toast,
       message: "Updating order status, Please wait.",
     );
+
     await _order.updateOrderStatus(
-      id: query["_id"],
+      refNumber: query["refNumber"],
       prevStatus: query["status"],
     );
-    await onRefreshOrders(query);
+
+    await onRefreshOrders({
+      "accountId": _profile.data["accountId"],
+      "status": query["status"],
+    });
     Get.back();
   }
 
   Future<void> onRefreshOrders(query) async {
     setState(() {
-      _getOrders = _order.getCustomerOrders(query);
+      _getOrders = _order.getMerchantOrders(query);
     });
   }
 
@@ -67,10 +76,9 @@ class _MerchantOrdersState extends State<MerchantOrders>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _getOrders = _order.getCustomerOrders({
+    _tabController = TabController(length: 3, vsync: this);
+    _getOrders = _order.getMerchantOrders({
       "accountId": _profile.data["accountId"],
-      "accountType": "merchant",
       "status": "to-pack",
     });
   }
@@ -125,28 +133,19 @@ class _MerchantOrdersState extends State<MerchantOrders>
                 if (index == 0) {
                   onRefreshOrders({
                     "accountId": _profile.data["accountId"],
-                    "accountType": "merchant",
                     "status": "to-pack",
                   });
                 }
+
                 if (index == 1) {
                   onRefreshOrders({
                     "accountId": _profile.data["accountId"],
-                    "accountType": "merchant",
-                    "status": "packed",
+                    "status": "to-deliver",
                   });
                 }
                 if (index == 2) {
                   onRefreshOrders({
                     "accountId": _profile.data["accountId"],
-                    "accountType": "merchant",
-                    "status": "to-deliver",
-                  });
-                }
-                if (index == 3) {
-                  onRefreshOrders({
-                    "accountId": _profile.data["accountId"],
-                    "accountType": "merchant",
                     "status": "delivered",
                   });
                 }
@@ -163,6 +162,7 @@ class _MerchantOrdersState extends State<MerchantOrders>
             ),
       // elevation: 0,
     );
+
     return Scaffold(
       backgroundColor: kLight,
       appBar: _appBar,
@@ -197,6 +197,8 @@ class _MerchantOrdersState extends State<MerchantOrders>
                   snapshot.data[index]["header"]["customer"]["lastName"];
               final _customerAddress =
                   snapshot.data[index]["header"]["customer"]["address"];
+              final _amountToPay = snapshot.data[index]["content"]["total"];
+
               return Container(
                 margin: EdgeInsets.only(top: index == 0 ? 0 : 10),
                 padding: const EdgeInsets.all(25.0),
@@ -211,22 +213,10 @@ class _MerchantOrdersState extends State<MerchantOrders>
                         SizedBox(
                           width: 250.0,
                           child: Text(
-                            "Receiver",
-                            style: GoogleFonts.roboto(
-                              color: kDark,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        SizedBox(
-                          width: 250.0,
-                          child: Text(
                             _customerName,
                             style: GoogleFonts.roboto(
                               color: kDark,
-                              fontSize: 15.0,
+                              fontSize: 12.0,
                               fontWeight: FontWeight.w400,
                             ),
                             maxLines: 3,
@@ -239,7 +229,7 @@ class _MerchantOrdersState extends State<MerchantOrders>
                             _customerAddress,
                             style: GoogleFonts.roboto(
                               color: kDark.withOpacity(0.5),
-                              fontSize: 12.0,
+                              fontSize: 10.0,
                             ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
@@ -258,10 +248,12 @@ class _MerchantOrdersState extends State<MerchantOrders>
                             [imgIndex]["qty"];
                         final _price = int.parse(snapshot.data[index]["content"]
                             ["items"][imgIndex]["price"]);
+
                         final _subTotal = _qty * _price;
+
                         return Container(
                           margin: const EdgeInsets.only(top: 10.0),
-                          height: 100.0,
+                          height: 90.0,
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Row(
@@ -287,7 +279,7 @@ class _MerchantOrdersState extends State<MerchantOrders>
                                         _title,
                                         style: GoogleFonts.roboto(
                                           color: kDark,
-                                          fontSize: 14.0,
+                                          fontSize: 10.0,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -298,14 +290,14 @@ class _MerchantOrdersState extends State<MerchantOrders>
                                       "Quantity: x$_qty",
                                       style: GoogleFonts.roboto(
                                         color: kDark,
-                                        fontSize: 14.0,
+                                        fontSize: 10.0,
                                       ),
                                     ),
                                     Text(
-                                      "Subtotal: P$_subTotal.00",
-                                      style: GoogleFonts.robotoMono(
+                                      value.format(_subTotal),
+                                      style: GoogleFonts.rajdhani(
                                         fontSize: 14.0,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.bold,
                                         color: kDanger,
                                       ),
                                     ),
@@ -319,6 +311,87 @@ class _MerchantOrdersState extends State<MerchantOrders>
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                     ),
+                    snapshot.data[index]["status"] == "to-pack"
+                        ? Container(
+                            margin: const EdgeInsets.only(top: 25.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  height: 50,
+                                  width: 150,
+                                  child: TextButton(
+                                    onPressed: () => onMoveOrder({
+                                      "refNumber": snapshot.data[index]
+                                          ["refNumber"],
+                                      "status": _orderStatus,
+                                    }),
+                                    style: TextButton.styleFrom(
+                                      //primary: kFadeWhite,
+                                      backgroundColor: kPrimary,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: kDefaultRadius,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _buttonTtitle[_tabController!.index],
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.w400,
+                                        color: kWhite,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "AMOUNT TO PAY",
+                                      style: GoogleFonts.roboto(
+                                        color: kDark.withOpacity(0.5),
+                                        fontSize: 10.0,
+                                      ),
+                                    ),
+                                    Text(
+                                      _amountToPay,
+                                      style: GoogleFonts.rajdhani(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: kDanger,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox(),
+                    snapshot.data[index]["status"] == "to-deliver"
+                        ? Container(
+                            margin: const EdgeInsets.only(top: 25.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "AMOUNT TO PAY",
+                                  style: GoogleFonts.roboto(
+                                    color: kDark.withOpacity(0.5),
+                                    fontSize: 10.0,
+                                  ),
+                                ),
+                                Text(
+                                  _amountToPay,
+                                  style: GoogleFonts.rajdhani(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: kDanger,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox(),
                     snapshot.data[index]["status"] == "delivered"
                         ? Container(
                             margin: const EdgeInsets.only(top: 25.0),
@@ -338,11 +411,12 @@ class _MerchantOrdersState extends State<MerchantOrders>
                                       .substring(0, 18)
                                       .replaceAll(r'-', ""),
                                   style: GoogleFonts.robotoMono(
-                                    color: kDark.withOpacity(0.8),
-                                    fontSize: 15.0,
+                                    color: kDark,
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 5),
                                 Text(
                                   "Amount Paid",
                                   style: GoogleFonts.roboto(
@@ -351,15 +425,16 @@ class _MerchantOrdersState extends State<MerchantOrders>
                                   ),
                                 ),
                                 Text(
-                                  "P${_calculateTotal(snapshot.data[index]["content"]["items"])}.00",
-                                  style: GoogleFonts.robotoMono(
-                                    color: kDark.withOpacity(0.8),
-                                    fontSize: 15.0,
+                                  _amountToPay,
+                                  style: GoogleFonts.rajdhani(
+                                    color: Colors.red,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 5),
                                 Text(
-                                  "Delivered",
+                                  "Delivered on",
                                   style: GoogleFonts.roboto(
                                     color: kDark.withOpacity(0.5),
                                     fontSize: 10.0,
@@ -370,66 +445,10 @@ class _MerchantOrdersState extends State<MerchantOrders>
                                           ["updatedAt"])
                                       .yMMMEdjm,
                                   style: GoogleFonts.roboto(
-                                    color: kDark.withOpacity(0.8),
-                                    fontSize: 15.0,
+                                    color: kDark,
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : const SizedBox(),
-                    snapshot.data[index]["status"] != "delivered"
-                        ? Container(
-                            margin: const EdgeInsets.only(top: 25.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  height: 50,
-                                  width: 150,
-                                  child: TextButton(
-                                    onPressed: () => onMoveOrder({
-                                      "_id": _orderId,
-                                      "accountId": _profile.data["accountId"],
-                                      "accountType": "merchant",
-                                      "status": _orderStatus,
-                                    }),
-                                    style: TextButton.styleFrom(
-                                      //primary: kFadeWhite,
-                                      backgroundColor: Colors.deepOrange,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: kDefaultRadius,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _buttonTtitle[_tabController!.index],
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.w400,
-                                        color: kWhite,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      "TOTAL",
-                                      style: GoogleFonts.roboto(
-                                        color: kDark.withOpacity(0.5),
-                                        fontSize: 10.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      "P${_calculateTotal(snapshot.data[index]["content"]["items"])}.00",
-                                      style: GoogleFonts.robotoMono(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: kDanger,
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),

@@ -56,7 +56,7 @@ class CartController extends GetxController {
   }
 
   Future<void> chekoutCart(data) async {
-    await Dio().post(baseUrl + "/order", data: data);
+    await Dio().post(baseUrl + "/checkout", data: data);
     clear();
   }
 }

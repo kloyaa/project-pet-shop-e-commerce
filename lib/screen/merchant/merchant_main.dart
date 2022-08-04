@@ -3,6 +3,7 @@ import 'package:app/const/material.dart';
 import 'package:app/controllers/orderController.dart';
 import 'package:app/controllers/profileController.dart';
 import 'package:app/controllers/userController.dart';
+import 'package:app/helpers/format_currency.dart';
 import 'package:app/screen/merchant/sub/merchant_qrCode.dart';
 import 'package:app/widget/snapshot.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -29,7 +30,7 @@ class _MerchantMainState extends State<MerchantMain> {
 
   Future<void> onRefreshOrders(query) async {
     setState(() {
-      _getOrders = _order.getCustomerOrders(query);
+      _getOrders = _order.getMerchantOrders(query);
     });
   }
 
@@ -47,7 +48,7 @@ class _MerchantMainState extends State<MerchantMain> {
   @override
   void initState() {
     super.initState();
-    _getOrders = _order.getCustomerOrders({
+    _getOrders = _order.getMerchantOrders({
       "accountId": _profile.data["accountId"],
       "status": "to-pack",
     });
@@ -376,7 +377,6 @@ class _MerchantMainState extends State<MerchantMain> {
                     return RefreshIndicator(
                       onRefresh: () => onRefreshOrders({
                         "accountId": _profile.data["accountId"],
-                        "accountType": "merchant",
                         "status": "to-pack",
                       }),
                       child: ListView.builder(
@@ -412,7 +412,7 @@ class _MerchantMainState extends State<MerchantMain> {
                                           _customerName,
                                           style: GoogleFonts.roboto(
                                             color: kDark,
-                                            fontSize: 15.0,
+                                            fontSize: 12.0,
                                             fontWeight: FontWeight.w400,
                                           ),
                                           maxLines: 3,
@@ -426,13 +426,14 @@ class _MerchantMainState extends State<MerchantMain> {
                                               .startOf(Units.SECOND)
                                               .fromNow(),
                                           style: GoogleFonts.roboto(
-                                            fontSize: 12.0,
+                                            fontSize: 10.0,
                                             fontWeight: FontWeight.w400,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
+                                  const SizedBox(height: 25.0),
                                   ListView.builder(
                                     itemCount: snapshot
                                         .data[index]["content"]["items"].length,
@@ -450,7 +451,7 @@ class _MerchantMainState extends State<MerchantMain> {
                                       return Container(
                                         margin:
                                             const EdgeInsets.only(top: 10.0),
-                                        height: 100.0,
+                                        height: 90.0,
                                         child: Align(
                                           alignment: Alignment.centerLeft,
                                           child: Row(
@@ -481,7 +482,7 @@ class _MerchantMainState extends State<MerchantMain> {
                                                       _title,
                                                       style: GoogleFonts.roboto(
                                                         color: kDark,
-                                                        fontSize: 14.0,
+                                                        fontSize: 10.0,
                                                       ),
                                                       maxLines: 2,
                                                       overflow:
@@ -493,16 +494,15 @@ class _MerchantMainState extends State<MerchantMain> {
                                                     "Quantity: x$_qty",
                                                     style: GoogleFonts.roboto(
                                                       color: kDark,
-                                                      fontSize: 14.0,
+                                                      fontSize: 10.0,
                                                     ),
                                                   ),
                                                   Text(
-                                                    "Subtotal: P$_subTotal",
-                                                    style:
-                                                        GoogleFonts.robotoMono(
+                                                    value.format(_subTotal),
+                                                    style: GoogleFonts.rajdhani(
                                                       fontSize: 14.0,
                                                       fontWeight:
-                                                          FontWeight.w500,
+                                                          FontWeight.bold,
                                                       color: kDanger,
                                                     ),
                                                   ),
@@ -517,6 +517,46 @@ class _MerchantMainState extends State<MerchantMain> {
                                     physics:
                                         const NeverScrollableScrollPhysics(),
                                   ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      const SizedBox(height: 25),
+                                      const Divider(),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        "DELIVERY FEE",
+                                        style: GoogleFonts.roboto(
+                                          color: kDark.withOpacity(0.5),
+                                          fontSize: 8.0,
+                                        ),
+                                      ),
+                                      Text(
+                                        snapshot.data[index]["deliveryFee"],
+                                        style: GoogleFonts.robotoMono(
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w600,
+                                          color: kDanger,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        "AMOUNT TO PAY",
+                                        style: GoogleFonts.roboto(
+                                          color: kDark.withOpacity(0.5),
+                                          fontSize: 8.0,
+                                        ),
+                                      ),
+                                      Text(
+                                        snapshot.data[index]["content"]
+                                            ["total"],
+                                        style: GoogleFonts.robotoMono(
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w600,
+                                          color: kDanger,
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),

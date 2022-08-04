@@ -73,8 +73,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
 
     // _emailController.text = "madridano.kolya@gmail.com";
     // _passwordController.text = "password";
-    _emailController.text = "pet.supplies@gmail.com";
-    _passwordController.text = "password";
+    // _emailController.text = "pet.supplies@gmail.com";
+    // _passwordController.text = "password";
   }
 
   @override
@@ -187,13 +187,13 @@ class _RegisterAccountState extends State<RegisterAccount> {
                     color: kLight,
                     hasError: _hasError,
                     labelText: "Email",
-                    textFieldStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
+                    textFieldStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
-                    hintStyleStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
+                    hintStyleStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
@@ -209,13 +209,13 @@ class _RegisterAccountState extends State<RegisterAccount> {
                     labelText: "Password",
                     color: kLight,
                     hasError: _hasError,
-                    textFieldStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
+                    textFieldStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),
-                    hintStyleStyle: GoogleFonts.chivo(
-                      fontSize: 14.0,
+                    hintStyleStyle: GoogleFonts.roboto(
+                      fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       color: kPrimary,
                     ),

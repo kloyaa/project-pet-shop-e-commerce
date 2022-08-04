@@ -39,9 +39,8 @@ class ListingController extends GetxController {
 
   Future<dynamic> searchListings(keyword) async {
     final _listingsResponse = await Dio().get(
-      baseUrl + "/merchant/listing",
+      baseUrl + "/product/all",
       queryParameters: {
-        "type": "search",
         "keyword": keyword,
       },
     );

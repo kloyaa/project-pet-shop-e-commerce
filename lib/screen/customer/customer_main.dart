@@ -298,13 +298,15 @@ class _CustomerMainState extends State<CustomerMain> {
                               child: Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SizedBox(
                                     width: 200.0,
                                     child: CachedNetworkImage(
                                       imageUrl: _img,
                                       fit: BoxFit.cover,
-                                      alignment: Alignment.topCenter,
+                                      height: 150,
+                                      //  alignment: Alignment.topCenter,
                                     ),
                                   ),
                                   Container(
@@ -317,7 +319,7 @@ class _CustomerMainState extends State<CustomerMain> {
                                           _title,
                                           style: GoogleFonts.roboto(
                                             color: kDark,
-                                            fontSize: 13.0,
+                                            fontSize: 10.0,
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
@@ -325,7 +327,7 @@ class _CustomerMainState extends State<CustomerMain> {
                                         Text(
                                           "P$_price.00",
                                           style: GoogleFonts.rajdhani(
-                                            fontSize: 20.0,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.bold,
                                             color: kDanger,
                                           ),
