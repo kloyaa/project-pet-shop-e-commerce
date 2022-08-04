@@ -42,7 +42,14 @@ const getProducts = async (req, res) => {
 };
 const getAllProducts = async (req, res) => {
     try {
-      return Product.find({ title: { $regex: req.query.keyword, $options: "i" } })
+      const { keyword } = req.query;
+      if(keyword == null || keyword === "") {
+        return Product.find({})
+          .sort({ _id: -1 })
+          .then((value) => res.status(200).json(value))
+          .catch((err) => res.status(400).json(err));
+      }
+      return Product.find({ title: { $regex:keyword, $options: "i" } })
         .sort({ _id: -1 })
         .then((value) => res.status(200).json(value))
         .catch((err) => res.status(400).json(err));
