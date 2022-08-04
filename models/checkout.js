@@ -78,6 +78,10 @@ const CheckoutSchema = new Schema({
     required: [true, "status is required"],
     enum: checkoutStatus,
   },
+  deliveryFee: {
+    type: String,
+    required: [true, "deliveryFee is required"],
+  },
   estimatedDeliveryDateAndTime: {
     type: String,
     required: [true, "estimatedDeliveryDateAndTime is required"],
