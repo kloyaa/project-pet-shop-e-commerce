@@ -24,8 +24,8 @@ try {
   app.use("/api", require("./routes/routeTicket"));
   app.use("/api", require("./routes/routeCart"));
   app.use("/api", require("./routes/routeStatistics"));
-
-  app.listen(port, () => console.log(`SERVER IS RUNNING ON ${port}`));
+  
+  app.listen(port, () => console.log(`SERVER IS NOW RUNNING ON ${port}`));
 } catch (error) {
   console.log(error);
 }
